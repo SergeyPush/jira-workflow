@@ -1,23 +1,43 @@
 import './style.css';
 import TESTS from '../tests.yaml';
 
-// ─── State ───────────────────────────────────────────────────────────────────
+// ─── Constants ────────────────────────────────────────────────────────────────
 const LS_KEY = 'slot-qa-state';
+
+const STATUS_CLASS  = { pass: ' passed', fail: ' failed', skip: ' skipped' };
+const STATUS_SYMBOL = { pass: '✓', fail: '✗', skip: '–' };
+const STATUS_JIRA   = { pass: '(/)', fail: '(x)', skip: '(!)', null: '( )' };
+
+// ─── State ────────────────────────────────────────────────────────────────────
 const state = {};
-const allTests = [];
 
-// normalise each test entry: string → { label } object
-function normalise(t) {
-  return typeof t === 'string' ? { label: t } : t;
-}
-
-TESTS.forEach((cat, ci) => {
-  cat.tests.forEach((t, ti) => {
+// Pre-normalise all tests once at init: string → { label } object
+const allTests = TESTS.flatMap((cat, ci) =>
+  cat.tests.map((t, ti) => {
+    const test = typeof t === 'string' ? { label: t } : t;
     const id = `${ci}-${ti}`;
     state[id] = null;
-    allTests.push({ id, category: cat.category, label: normalise(t).label });
-  });
-});
+    return { id, ci, ti, category: cat.category, ...test };
+  })
+);
+
+// Cached DOM refs for stats (queried once, updated frequently)
+const elStats = {
+  total:    document.getElementById('statTotal'),
+  allTotal: document.getElementById('statAllTotal'),
+  pass:     document.getElementById('statPass'),
+  fail:     document.getElementById('statFail'),
+  skip:     document.getElementById('statSkip'),
+  fill:     document.getElementById('progressFill'),
+};
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function computeCounts() {
+  return Object.values(state).reduce(
+    (acc, v) => { if (v) acc[v]++; return acc; },
+    { pass: 0, fail: 0, skip: 0 }
+  );
+}
 
 function saveToStorage() {
   localStorage.setItem(LS_KEY, JSON.stringify({
@@ -55,25 +75,22 @@ function render() {
     `;
     catEl.appendChild(header);
 
-    cat.tests.forEach((t, ti) => {
-      const test = normalise(t);
+    cat.tests.forEach((_, ti) => {
+      const test = allTests.find(t => t.ci === ci && t.ti === ti);
       const id = `${ci}-${ti}`;
       const status = state[id];
 
       const item = document.createElement('div');
       item.className = 'test-item';
 
-      // main row: label + optional info btn + status buttons
       const main = document.createElement('div');
       main.className = 'test-main';
 
       const lbl = document.createElement('span');
-      lbl.className = 'test-label' +
-        (status === 'pass' ? ' passed' : status === 'fail' ? ' failed' : status === 'skip' ? ' skipped' : '');
+      lbl.className = 'test-label' + (STATUS_CLASS[status] || '');
       lbl.textContent = test.label;
       main.appendChild(lbl);
 
-      // info button — only if steps exist
       if (test.steps?.length) {
         const stepsEl = document.createElement('div');
         stepsEl.className = 'test-steps';
@@ -94,10 +111,7 @@ function render() {
           infoBtn.classList.toggle('active', open);
         };
         main.appendChild(infoBtn);
-        item.appendChild(main);
         item.appendChild(stepsEl);
-      } else {
-        item.appendChild(main);
       }
 
       const btnGroup = document.createElement('div');
@@ -106,7 +120,7 @@ function render() {
         const btn = document.createElement('button');
         btn.className = `btn-status ${s}${status === s ? ' active' : ''}`;
         btn.title = s.charAt(0).toUpperCase() + s.slice(1);
-        btn.textContent = s === 'pass' ? '✓' : s === 'fail' ? '✗' : '–';
+        btn.textContent = STATUS_SYMBOL[s];
         btn.onclick = () => {
           state[id] = state[id] === s ? null : s;
           render();
@@ -117,6 +131,7 @@ function render() {
       });
 
       main.appendChild(btnGroup);
+      item.prepend(main);
       catEl.appendChild(item);
     });
 
@@ -125,46 +140,36 @@ function render() {
 }
 
 function updateStats() {
-  const values = Object.values(state);
-  const pass = values.filter(v => v === 'pass').length;
-  const fail = values.filter(v => v === 'fail').length;
-  const skip = values.filter(v => v === 'skip').length;
+  const { pass, fail, skip } = computeCounts();
   const total = pass + fail + skip;
 
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statAllTotal').textContent = allTests.length;
-  document.getElementById('statPass').textContent = pass;
-  document.getElementById('statFail').textContent = fail;
-  document.getElementById('statSkip').textContent = skip;
-
-  const pct = allTests.length > 0 ? (total / allTests.length) * 100 : 0;
-  document.getElementById('progressFill').style.width = pct + '%';
+  elStats.total.textContent    = total;
+  elStats.allTotal.textContent = allTests.length;
+  elStats.pass.textContent     = pass;
+  elStats.fail.textContent     = fail;
+  elStats.skip.textContent     = skip;
+  elStats.fill.style.width     = allTests.length > 0 ? `${(total / allTests.length) * 100}%` : '0%';
 }
 
 // ─── Jira markup ─────────────────────────────────────────────────────────────
 function buildJiraMarkup() {
   const game = document.getElementById('gameName').value.trim() || '—';
   const date = new Date().toLocaleDateString('en-GB');
-
-  const values = Object.values(state);
-  const pass = values.filter(v => v === 'pass').length;
-  const fail = values.filter(v => v === 'fail').length;
-  const skip = values.filter(v => v === 'skip').length;
-  const total = allTests.length;
+  const { pass, fail, skip } = computeCounts();
 
   let out = `*QA Acceptance Test* — ${game}\n`;
   out += `Date: ${date}\n`;
-  out += `Result: *${pass}/${total} passed*`;
+  out += `Result: *${pass}/${allTests.length} passed*`;
   if (fail > 0) out += ` | ❌ ${fail} failed`;
   if (skip > 0) out += ` | ⏭ ${skip} skipped`;
   out += '\n\n';
 
   TESTS.forEach((cat, ci) => {
     out += `*${cat.category}*\n`;
-    cat.tests.forEach((t, ti) => {
+    cat.tests.forEach((_, ti) => {
+      const test = allTests.find(t => t.ci === ci && t.ti === ti);
       const s = state[`${ci}-${ti}`];
-      const icon = s === 'pass' ? '(/)' : s === 'fail' ? '(x)' : s === 'skip' ? '(!)' : '( )';
-      out += `${icon} ${normalise(t).label}\n`;
+      out += `${STATUS_JIRA[s] ?? '( )'} ${test.label}\n`;
     });
     out += '\n';
   });
