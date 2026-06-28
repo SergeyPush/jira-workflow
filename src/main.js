@@ -66,18 +66,19 @@ function render() {
     const catEl = document.createElement('div');
     catEl.className = 'category';
 
-    const total = cat.tests.length;
-    const passed  = cat.tests.filter((_, ti) => state[`${ci}-${ti}`] === 'pass').length;
-    const failed  = cat.tests.filter((_, ti) => state[`${ci}-${ti}`] === 'fail').length;
+    const total    = cat.tests.length;
+    const passed   = cat.tests.filter((_, ti) => state[`${ci}-${ti}`] === 'pass').length;
+    const failed   = cat.tests.filter((_, ti) => state[`${ci}-${ti}`] === 'fail').length;
     const reviewed = cat.tests.filter((_, ti) => state[`${ci}-${ti}`] !== null).length;
-    const allDone = reviewed === total;
-    const allPass = passed === total;
+    const allDone  = reviewed === total;
+    const doneClass = !allDone ? '' : failed > 0 ? ' done-fail' : passed === total ? ' done-pass' : ' done-skip';
+    const doneIcon  = !allDone ? `${passed}/${total}` : failed > 0 ? '✗' : passed === total ? '✓' : '–';
 
     const header = document.createElement('div');
-    header.className = 'category-header' + (allDone ? (allPass ? ' done-pass' : ' done-fail') : '');
+    header.className = 'category-header' + doneClass;
     header.innerHTML = `
       <span class="category-title">${cat.category}</span>
-      <span class="category-score">${allDone ? (allPass ? '✓' : '✗') : `${passed}/${total}`}</span>
+      <span class="category-score">${doneIcon}</span>
     `;
     catEl.appendChild(header);
 

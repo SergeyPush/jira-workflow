@@ -181,6 +181,18 @@ header p {
   font-size: 13px;
 }
 
+.category-header.done-skip {
+  background: var(--amber-bg);
+  border-bottom-color: #fde68a;
+}
+
+.category-header.done-skip .category-title { color: var(--amber); }
+.category-header.done-skip .category-score {
+  background: var(--amber);
+  color: #fff;
+  font-size: 13px;
+}
+
 /* ── Test row ── */
 .test-item {
   display: flex;
