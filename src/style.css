@@ -157,6 +157,30 @@ header p {
   border-radius: 99px;
 }
 
+.category-header.done-pass {
+  background: var(--green-bg);
+  border-bottom-color: #bbf7d0;
+}
+
+.category-header.done-pass .category-title { color: var(--green); }
+.category-header.done-pass .category-score {
+  background: var(--green);
+  color: #fff;
+  font-size: 13px;
+}
+
+.category-header.done-fail {
+  background: var(--red-bg);
+  border-bottom-color: #fecaca;
+}
+
+.category-header.done-fail .category-title { color: var(--red); }
+.category-header.done-fail .category-score {
+  background: var(--red);
+  color: #fff;
+  font-size: 13px;
+}
+
 /* ── Test row ── */
 .test-item {
   display: flex;
