@@ -2,10 +2,11 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "qa-checklist",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "-p", "3333", "."],
-      "port": 3333
+      "name": "dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5174,
+      "autoPort": true
     }
   ]
 }
