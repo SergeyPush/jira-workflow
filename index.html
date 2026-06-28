@@ -352,90 +352,23 @@
 <div class="toast" id="toast">Copied to clipboard!</div>
 
 <script>
-// ─── Test definitions ───────────────────────────────────────────────────────
-const TESTS = [
-  {
-    category: "Game Loading",
-    tests: [
-      "Game loads without errors",
-      "All assets (symbols, backgrounds) loaded correctly",
-      "Sound assets loaded, no audio glitches on startup",
-      "Loading screen / progress bar displays correctly",
-    ]
-  },
-  {
-    category: "Basic Gameplay",
-    tests: [
-      "Spin button triggers a spin",
-      "Reel animation plays correctly",
-      "Win line highlights display correctly",
-      "Win amount calculated and displayed correctly",
-      "Balance updates after each spin (debit & credit)",
-      "Paytable opens and shows correct values",
-    ]
-  },
-  {
-    category: "Bet Settings",
-    tests: [
-      "Bet level / coin value can be changed",
-      "Min and max bet limits are enforced",
-      "Total bet displayed correctly after change",
-      "Max Bet button sets highest available bet",
-    ]
-  },
-  {
-    category: "Autoplay",
-    tests: [
-      "Autoplay starts with selected number of spins",
-      "Autoplay stops at 0 remaining spins",
-      "Stop on feature win setting works",
-      "Stop on loss limit setting works",
-      "Autoplay can be manually stopped mid-session",
-    ]
-  },
-  {
-    category: "Bonus / Free Spins",
-    tests: [
-      "Bonus game / free spins trigger on correct scatter count",
-      "Free spins counter shows correct remaining count",
-      "Free spins winnings accumulate correctly",
-      "Bonus game ends and returns to base game",
-      "Retriggering free spins works (if applicable)",
-    ]
-  },
-  {
-    category: "UI / UX",
-    tests: [
-      "Win animation and sound play on win",
-      "Big Win / Mega Win celebration triggers correctly",
-      "Info / Help screen opens and closes",
-      "Game rules and RTP displayed correctly",
-      "No overlapping UI elements or layout breaks",
-    ]
-  },
-  {
-    category: "Responsible Gambling",
-    tests: [
-      "Reality check / session reminder triggers on time",
-      "Game history accessible and correct",
-    ]
-  },
-];
-
 // ─── State ───────────────────────────────────────────────────────────────────
 const LS_KEY = 'slot-qa-state';
 
+let TESTS = [];
 const state = {};
-
-// Build flat list with ids
 const allTests = [];
-TESTS.forEach((cat, ci) => {
-  cat.tests.forEach((label, ti) => {
-    const id = `${ci}-${ti}`;
-    state[id] = null;
-    allTests.push({ id, category: cat.category, label });
+
+function initTests(tests) {
+  TESTS = tests;
+  tests.forEach((cat, ci) => {
+    cat.tests.forEach((label, ti) => {
+      const id = `${ci}-${ti}`;
+      state[id] = null;
+      allTests.push({ id, category: cat.category, label });
+    });
   });
-});
+}
 
 function saveToStorage() {
   localStorage.setItem(LS_KEY, JSON.stringify({
@@ -598,9 +531,14 @@ document.getElementById('previewClose').addEventListener('click', () => {
 });
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
-loadFromStorage();
-render();
-updateStats();
+fetch('tests.json')
+  .then(r => r.json())
+  .then(tests => {
+    initTests(tests);
+    loadFromStorage();
+    render();
+    updateStats();
+  });
 
 // persist game name on input
 document.getElementById('gameName').addEventListener('input', saveToStorage);
