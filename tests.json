@@ -62,7 +62,9 @@
     "category": "Responsible Gambling",
     "tests": [
       "Reality check / session reminder triggers on time",
-      "Game history accessible and correct"
+      "Game history accessible and correct",
+      "Game history can be cleared",
+      "Game history persists across sessions"
     ]
   }
 ]
