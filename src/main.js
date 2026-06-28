@@ -88,7 +88,7 @@ function render() {
         const infoBtn = document.createElement('button');
         infoBtn.className = 'btn-info';
         infoBtn.title = 'Show steps';
-        infoBtn.textContent = 'i';
+        infoBtn.textContent = '?';
         infoBtn.onclick = () => {
           const open = stepsEl.classList.toggle('visible');
           infoBtn.classList.toggle('active', open);
