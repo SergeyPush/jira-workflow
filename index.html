@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Slot QA Checklist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/assets/index-CuQNXhCW.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BhrmmPgq.css">
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Slot QA Checklist</h1>
+    <p>Mark each test, then copy results to Jira.</p>
+  </header>
+
+  <div class="meta-row">
+    <input type="text" id="gameName" placeholder="Game name (e.g. Lucky Joker 100)" />
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat total">Reviewed: <span id="statTotal">0</span> / <span id="statAllTotal">0</span></div>
+    <div class="stat pass">Passed: <span id="statPass">0</span></div>
+    <div class="stat fail">Failed: <span id="statFail">0</span></div>
+    <div class="stat skip">Skipped: <span id="statSkip">0</span></div>
+  </div>
+
+  <div id="checklist"></div>
+
+  <div class="actions">
+    <button class="btn btn-copy" id="btnCopy">Copy for Jira</button>
+    <button class="btn btn-reset" id="btnReset">Reset all</button>
+  </div>
+
+  <div class="preview" id="preview">
+    <div class="preview-header">
+      <span>Jira comment preview</span>
+      <a id="previewClose">hide</a>
+    </div>
+    <pre id="previewContent"></pre>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">Copied to clipboard!</div>
+
+</body>
+</html>
